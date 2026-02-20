@@ -1,0 +1,36 @@
+#include <iostream>
+using namespace std;
+
+// Galois Field multiplication
+unsigned char gmul(unsigned char a, unsigned char b){
+    unsigned char p=0;
+    for(int i=0;i<8;i++){
+        if(b&1) p^=a;
+        bool hi = a & 0x80;
+        a <<= 1;
+        if(hi) a ^= 0x1b;
+        b >>= 1;
+    }
+    return p;
+}
+
+int main(){
+    unsigned char c[4];
+
+    cout<<"Enter 4 bytes (hex): ";
+    for(int i=0;i<4;i++)
+        cin>>hex>>c[i];
+
+    unsigned char r[4];
+
+    r[0]=gmul(0x02,c[0])^gmul(0x03,c[1])^c[2]^c[3];
+    r[1]=c[0]^gmul(0x02,c[1])^gmul(0x03,c[2])^c[3];
+    r[2]=c[0]^c[1]^gmul(0x02,c[2])^gmul(0x03,c[3]);
+    r[3]=gmul(0x03,c[0])^c[1]^c[2]^gmul(0x02,c[3]);
+
+    cout<<"\nAfter MixColumn:\n";
+    for(int i=0;i<4;i++)
+        cout<<hex<<(int)r[i]<<" ";
+
+    return 0;
+}
