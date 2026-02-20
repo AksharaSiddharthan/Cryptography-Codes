@@ -1,0 +1,48 @@
+#include <iostream>
+using namespace std;
+
+// Simple (base^exp) % mod
+long long power(long long b, long long e, long long m) {
+    long long r = 1;
+    for (int i = 0; i < e; i++)
+        r = (r * b) % m;
+    return r;
+}
+
+int main() {
+    long long p, g, a, b, m;
+
+    cout << "Enter prime (p) and primitive root (g): ";
+    cin >> p >> g;
+
+    cout << "Enter private keys of A and B: ";
+    cin >> a >> b;
+
+    // Public keys
+    long long A = power(g, a, p);
+    long long B = power(g, b, p);
+
+    cout << "\nPublic key of A: " << A; g^a mod p
+    cout << "\nPublic key of B: " << B; g^b mod p
+
+    // Shared key
+    long long keyA = power(B, a, p); g^b^a mod p
+    long long keyB = power(A, b, p);
+
+    cout << "\nShared key by A: " << keyA;
+    cout << "\nShared key by B: " << keyB;
+
+    // MITM
+    cout << "\n\n--- Man in the Middle ---";
+    cout << "\nEnter attacker private key: ";
+    cin >> m;
+
+    long long M = power(g, m, p); g^m mod p
+
+    cout << "\nA's key with attacker: " << power(M, a, p); M^a mod p
+    cout << "\nB's key with attacker: " << power(M, b, p); 
+    cout << "\nAttacker with A: " << power(A, m, p);
+    cout << "\nAttacker with B: " << power(B, m, p);
+
+    return 0;
+}
