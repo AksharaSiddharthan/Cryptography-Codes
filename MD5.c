@@ -1,37 +1,34 @@
-#include <stdio.h>
-#include <stdint.h>
+#include <iostream>
+#include <cstdint>
+using namespace std;
 
-#define F(b,c,d) (((b) & (c)) | (~(b) & (d)))
-#define ROT(x,s) (((x) << (s)) | ((x) >> (32 - (s))))
+uint32_t F(uint32_t b, uint32_t c, uint32_t d) {
+    return (b & c) | (~b & d);
+}
+
+uint32_t leftRotate(uint32_t x, int n) {
+    return (x << n) | (x >> (32 - n));
+}
 
 int main() {
-    uint32_t A, B, C, D, M, K1, s;
+    uint32_t A, B, C, D, K1, M0;
+    int s = 7;
 
-    printf("Enter A B C D (hex): ");
-    scanf("%x %x %x %x", &A, &B, &C, &D);
-    printf("Enter M K1 (hex): ");
-    scanf("%x %x", &M, &K1);
-    printf("Enter shift s (0 = only modular addition): ");
-    scanf("%u", &s);
+    cout << "Enter buffers A B C D (hex, e.g. 67452301 EFCDAB89 98BADCFE 10325476): ";
+    cin >> hex >> A >> B >> C >> D;   // ← hex modifier added
 
-    printf("\nBuffers read:\n");
-    printf("A=%08X B=%08X C=%08X D=%08X\n", A, B, C, D);
+    cout << "Enter K1 (hex, e.g. d76aa478): ";
+    cin >> hex >> K1;                 // ← hex modifier added
 
-    uint32_t f_val = (B & C) | (~B & D);   // written out explicitly, no macro
-    uint32_t inner = A + f_val + M + K1;
+    cout << "Enter message word M0 (hex, e.g. 00000000): ";
+    cin >> hex >> M0;                 // ← hex modifier added
 
-    printf("\nF(B,C,D)        = %08X\n", f_val);
-    printf("A+F(B,C,D)+M+K1 = %08X\n",  inner);
+    uint32_t newA = B + leftRotate(A + F(B, C, D) + M0 + K1, s);
 
-    if (s == 0) {
-        printf("Result (no rot) = %08X\n", inner);
-        printf("(Only modular addition performed)\n");
-    } else {
-        uint32_t rotated = ROT(inner, s);
-        uint32_t newA    = B + rotated;
-        printf("After ROT(%u)   = %08X\n", s, rotated);
-        printf("New A = B+rot  = %08X\n",  newA);
-        printf("(Full MD5 step performed)\n");
-    }
+    printf("\nF(B,C,D)        = 0x%08X\n", F(B, C, D));
+    printf("Inner sum       = 0x%08X\n", A + F(B, C, D) + M0 + K1);
+    printf("After rotate(7) = 0x%08X\n", leftRotate(A + F(B, C, D) + M0 + K1, s));
+    printf("new_A           = 0x%08X\n", newA);
+
     return 0;
 }
